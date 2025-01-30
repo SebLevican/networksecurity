@@ -57,6 +57,7 @@ class DataIngestion:
         
     def split_data_as_train_test(self,dataframe: pd.DataFrame):
         try:
+            print(f'filas en data set antes de subir {dataframe.shape[0]}')
             train_set,test_set= train_test_split(
                 dataframe, test_size=self.data_ingestion_config.train_test_split_ratio
             )
@@ -96,4 +97,4 @@ class DataIngestion:
             
             return dataingestionartifact
         except Exception as e:
-            raise NetworkSecurityException
+            raise NetworkSecurityException(e,sys)

@@ -7,6 +7,6 @@ setuptools
 pymongo[srv]==3.12
 scikit-learn
 scipy
-dill
 pyaml
-
+mlflow
+dagshub
