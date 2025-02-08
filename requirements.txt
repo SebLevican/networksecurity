@@ -10,3 +10,5 @@ scipy
 pyaml
 mlflow
 dagshub
+fastapi
+uvicorn
