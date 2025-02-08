@@ -10,7 +10,7 @@ on:
 
 jobs:
     integration:
-        name: Continous Integration
+        name: Continuous Integration
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Code
