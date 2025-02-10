@@ -60,9 +60,13 @@ jobs:
 
   deploy:
     name: Deploy Docker Image
-    needs: build-and-push-ar-image  # Asegura que este paso se ejecute después de la entrega
+    needs: build-and-push-ar-image
     runs-on: ubuntu-latest
     steps:
+      - name: Print Docker pull URL (for debugging)
+        run: |
+          echo "Docker pull URL: ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest"
+
       - name: Pull latest images from Artifact Registry
         run: |
           docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest
