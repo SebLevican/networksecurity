@@ -40,7 +40,9 @@ jobs:
           echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' > key.json
           gcloud auth activate-service-account --key-file=key.json
           gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
-          gcloud auth configure-docker southamerica-west1-docker.pkg.dev
+          gcloud auth configure-docker southamerica-west1-docker.pkg.dev --quiet
+        env:
+          CLOUDSDK_CORE_DISABLE_PROMPTS: 1
 
       - name: Build, tag, and push image to Artifact Repository
         id: build_image
@@ -53,7 +55,7 @@ jobs:
         run: |
           docker build -t $AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
           docker push $AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
-          echo "image=$AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
+          echo "IMAGE_URI=$AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Clean up credentials
         run: rm -f key.json
@@ -63,10 +65,27 @@ jobs:
     needs: build-and-push-ar-image
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: user
+      - name: Configure GCP credentials
+        id: login-AR
         run: |
-          gcloud auth list
+          echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' > key.json
+          gcloud auth activate-service-account --key-file=key.json
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud auth configure-docker southamerica-west1-docker.pkg.dev --quiet
+        env:
+          CLOUDSDK_CORE_DISABLE_PROMPTS: 1
+
+      - name: Verificar usuario autenticado
+        run: gcloud auth list
+
+      - name: Verificar si la imagen existe
+        run: |
+          gcloud artifacts docker images list ${{ secrets.AR_REPOSITORY_NAME }} \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --format="get(IMAGE_DIGEST)" || echo "No se encontró la imagen"
 
       - name: Pull latest images from Artifact Registry
         run: |
@@ -74,8 +93,13 @@ jobs:
 
       - name: Run Docker Image to serve users
         run: |
-          docker run -d -p 8080:8080 --ipc="host" --name=networksecurity -e 'GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
+          docker run -d -p 8080:8080 --ipc="host" --name=networksecurity \
+          -v "$(pwd)/key.json:/app/key.json" \
+          -e GOOGLE_APPLICATION_CREDENTIALS="/app/key.json" \
+          ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
 
       - name: Clean previous images and containers
-        run: |
-          docker system prune -f
+        run: docker system prune -f
+
+      - name: Clean up credentials
+        run: rm -f key.json
