@@ -37,7 +37,7 @@ jobs:
       - name: Configure GCP credentials
         id: login-AR
         run: |
-          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > key.json
+          echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' > key.json
           gcloud auth activate-service-account --key-file=key.json
           gcloud config set project causal-lattice-449320-f6
 
