@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "Docker pull URL: ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest"
           echo "GCP_ARTIFACT_REGISTRY_URI: ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}"
-          echo "AR_REPOSITORY_NAME: ${{ secrets.AR_REPOSITORY_NAME }}"
+          echo "AR_REPOSITORY_NAME: ${{ secrets.AR_IMAGE }}"
           echo "Docker pull URL: ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest"
         
       - name: Print full Docker pull command
@@ -81,7 +81,7 @@ jobs:
 
       - name: Pull latest images from Artifact Registry
         run: |
-          docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest
+          docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_IMAGE }}:latest
 
       - name: Run Docker Image to serve users
         run: |
