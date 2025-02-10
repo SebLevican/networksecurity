@@ -23,7 +23,7 @@ jobs:
 
   build-and-push-ar-image:
     name: Continuous Delivery
-    needs: integration  # Depende de la integración
+    needs: integration  
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -58,15 +58,19 @@ jobs:
       - name: Clean up credentials
         run: rm -f key.json
 
+  deploy:
+    name: Deploy Docker Image
+    needs: build-and-push-ar-image  # Asegura que este paso se ejecute después de la entrega
+    runs-on: ubuntu-latest
+    steps:
       - name: Pull latest images from Artifact Registry
         run: |
           docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest
-      
+
       - name: Run Docker Image to serve users
         run: |
           docker run -d -p 8080:8080 --ipc="host" --name=networksecurity -e 'GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
-      
+
       - name: Clean previous images and containers
         run: |
           docker system prune -f
-      
