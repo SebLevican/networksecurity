@@ -75,6 +75,10 @@ jobs:
           full_pull_command="${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest"
           echo "Full Docker pull command: docker pull $full_pull_command"
 
+      - name: Print envitonment variables
+        run: |
+          printenv
+
       - name: Pull latest images from Artifact Registry
         run: |
           docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest
