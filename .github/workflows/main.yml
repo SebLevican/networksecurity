@@ -81,7 +81,7 @@ jobs:
 
       - name: Pull latest images from Artifact Registry
         run: |
-          docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_IMAGE }}:latest
+          docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
 
       - name: Run Docker Image to serve users
         run: |
