@@ -57,3 +57,16 @@ jobs:
 
       - name: Clean up credentials
         run: rm -f key.json
+
+      - name: Pull latest images from Artifact Registry
+        run: |
+          docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}/${{ secrets.AR_REPOSITORY_NAME }}:latest
+      
+      - name: Run Docker Image to serve users
+        run: |
+          docker run -d -p 8080:8080 --ipc="host" --name=networksecurity -e 'GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
+      
+      - name: Clean previous images and containers
+        run: |
+          docker system prune -f
+      
