@@ -6,11 +6,6 @@ on:
       - main
     paths-ignore:
       - 'README.md'
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'README.md'
 
 jobs:
   integration:
@@ -19,36 +14,28 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-  integration:
-    name: Continuous Integration
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
 
-      - name: Lint code
-        run: echo "Linting repository"
       - name: Lint code
         run: echo "Linting repository"
 
       - name: Run unit tests
         run: echo "Running unit tests"
 
-
-build-and-push-ecr-image:
+  build-and-push-ecr-image:
     name: Continuous Delivery
-    needs: Integration
+    needs: integration  # Esto asegura que "build-and-push-ecr-image" dependa de la finalización de "integration"
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout Code
-     - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-     - name: Install Utilities
-       run: |
-         sudo apt-get update
-         sudo apt-get install -y jq unzip
-     - name: Configure GCP credentials
-       run:
-        ECHO $"{{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > /tmp/key.json
-        gcloud auth activate-service-account --key-file=/tmp/key.json
-        gcloud config set project causal-lattice-449320-f6
+      - name: Install Utilities
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+
+      - name: Configure GCP credentials
+        run: |
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > /tmp/key.json
+          gcloud auth activate-service-account --key-file=/tmp/key.json
+          gcloud config set project causal-lattice-449320-f6
