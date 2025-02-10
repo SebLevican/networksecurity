@@ -42,7 +42,7 @@ jobs:
           gcloud config set project causal-lattice-449320-f6
 
       - name: Build, tag, and push image to Artifact Repository
-        id: build - image
+        id: build_image
         env:
           AR_REGISTRY: southamerica-west1-docker.pkg.dev
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID}}
