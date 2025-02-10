@@ -21,9 +21,9 @@ jobs:
       - name: Run unit tests
         run: echo "Running unit tests"
 
-  build-and-push-ecr-image:
+  build-and-push-ar-image:
     name: Continuous Delivery
-    needs: integration  # Esto asegura que "build-and-push-ecr-image" dependa de la finalización de "integration"
+    needs: integration  # Depende de la integración
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -39,13 +39,14 @@ jobs:
         run: |
           echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' > key.json
           gcloud auth activate-service-account --key-file=key.json
-          gcloud config set project causal-lattice-449320-f6
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud auth configure-docker southamerica-west1-docker.pkg.dev
 
       - name: Build, tag, and push image to Artifact Repository
         id: build_image
         env:
           AR_REGISTRY: southamerica-west1-docker.pkg.dev
-          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID}}
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           AR_REPOSITORY: ${{ secrets.AR_REPOSITORY_NAME }}
           IMAGE_NAME: my-image
           IMAGE_TAG: latest
@@ -54,3 +55,5 @@ jobs:
           docker push $AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
           echo "image=$AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
 
+      - name: Clean up credentials
+        run: rm -f key.json
