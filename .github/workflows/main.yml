@@ -46,7 +46,7 @@ jobs:
         env:
           AR_REGISTRY: southamerica-west1-docker.pkg.dev
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID}}
-          AR_REPOSITORY: ${{ secrets.AR_REPOSITORY }}
+          AR_REPOSITORY: ${{ secrets.AR_REPOSITORY_NAME }}
           IMAGE_NAME: my-image
           IMAGE_TAG: latest
         run: |
