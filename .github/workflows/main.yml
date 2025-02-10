@@ -35,7 +35,22 @@ jobs:
           sudo apt-get install -y jq unzip
 
       - name: Configure GCP credentials
+        id: login-AR
         run: |
-          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > key.json
+          echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' > key.json
           gcloud auth activate-service-account --key-file=key.json
           gcloud config set project causal-lattice-449320-f6
+
+      - name: Build, tag, and push image to Artifact Repository
+        id: build - image
+        env:
+          AR_REGISTRY: southamerica-west1-docker.pkg.dev
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID}}
+          AR_REPOSITORY: ${{ secrets.AR_REPOSITORY }}
+          IMAGE_NAME: my-image
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG .
+          docker push $AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
+          echo "image=$AR_REGISTRY/$PROJECT_ID/$AR_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
+
