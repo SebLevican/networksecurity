@@ -12,3 +12,4 @@ mlflow
 dagshub
 fastapi
 uvicorn
+google-cloud-storage

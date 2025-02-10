@@ -9,6 +9,12 @@ from networksecurity.components.data_validation import DataValidation
 from networksecurity.components.data_transformation import DataTransformation
 from networksecurity.components.model_trainer import ModelTrainer
 
+from networksecurity.constant.training_pipeline import TRAINING_BUCKET_NAME
+from google.cloud import storage
+from networksecurity.constant.training_pipeline import SAVED_MODEL_DIR
+
+from dotenv import load_dotenv
+
 
 from networksecurity.entity.config_entity import (
     TrainingPipelineConfig,
@@ -28,6 +34,14 @@ from networksecurity.entity.artifact_entity import (
 class TrainingPipeline:
     def __init__(self):
         self.training_pipeline_config=TrainingPipelineConfig()
+        
+        load_dotenv()
+
+        credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+        
+        self.client = storage.Client()
 
     def start_data_ingestion(self):
         try:
@@ -82,6 +96,41 @@ class TrainingPipeline:
         except Exception as e:
             raise NetworkSecurityException(e,sys)
         
+    ## local artifact is going to s3 bucket    
+    def sync_artifact_dir_to_gcs(self):
+        try:
+            gcs_bucket_url = f"gs://{TRAINING_BUCKET_NAME}/artifact/{self.training_pipeline_config.timestamp}"
+            
+            self.sync_folder_to_gcs(
+                folder=self.training_pipeline_config.artifact_dir,
+                gcs_bucket_url=gcs_bucket_url
+            )
+        except Exception as e:
+            raise NetworkSecurityException(e,sys)
+        
+    ## local final model is going to s3 bucket 
+        
+    def sync_saved_model_dir_to_gcs(self):
+        try:
+            gcs_bucket_url = f"gs://{TRAINING_BUCKET_NAME}/final_model/{self.training_pipeline_config.timestamp}"
+            
+            self.sync_folder_to_gcs(
+                folder=self.training_pipeline_config.model_dir,
+                gcs_bucket_url=gcs_bucket_url
+            )
+        except Exception as e:
+            raise NetworkSecurityException(e,sys)
+        
+    def sync_folder_to_gcs(self,folder, gcs_bucket_url):
+        bucket_name= gcs_bucket_url.split('/')[2]
+        blob_path = '/'.join(gcs_bucket_url.split('/')[3:])
+
+        bucket = self.client.get_bucket(bucket_name)
+        for root, dirs, files in os.walk(folder):
+            for file in files:
+                local_file = os.path.join(root, file)
+                blob = bucket.blob(os.path.join(blob_path, os.path.relpath(local_file, folder)))
+                blob.upload_from_filename(local_file)
 
     def run_pipeline(self):
         try:
@@ -89,6 +138,9 @@ class TrainingPipeline:
             data_validation_artifact=self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
             data_transformation_artifact=self.start_data_transformation(data_validation_artifact=data_validation_artifact)
             model_trainer_artifact=self.start_model_trainer(data_transformation_artifact)
+
+            self.sync_artifact_dir_to_gcs()
+            self.sync_saved_model_dir_to_gcs()
             return model_trainer_artifact
         except Exception as e:
             raise NetworkSecurityException(e,sys)
