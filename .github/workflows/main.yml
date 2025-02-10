@@ -64,6 +64,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: user
+        run: |
+          gcloud auth list
+
       - name: Pull latest images from Artifact Registry
         run: |
           docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
