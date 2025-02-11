@@ -98,8 +98,5 @@ jobs:
           -e GOOGLE_APPLICATION_CREDENTIALS="/app/key.json" \
           ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
 
-      - name: Clean previous images and containers
-        run: docker system prune -f
-
-      - name: Clean up credentials
-        run: rm -f key.json
+      - name: Verificar contenedores activos
+        run: docker ps
