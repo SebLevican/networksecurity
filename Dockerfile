@@ -9,4 +9,4 @@ RUN apt-get update && pip install -r requirements.txt
 RUN pip install uvicorn
 
 # Cambiar las comillas simples por dobles y usar array correcto
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]

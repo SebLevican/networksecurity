@@ -94,7 +94,7 @@ jobs:
       - name: Run Docker Image to serve users
         run: |
           echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > key.json
-          docker run -d -p 8080:8080 --ipc="host" --name=networksecurity \
+          docker run -d -p 8080:8000 --ipc="host" --name=networksecurity \
             -e GOOGLE_APPLICATION_CREDENTIALS="/app/key.json" \
             -v "$(pwd)/key.json:/app/key.json" \
             ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
