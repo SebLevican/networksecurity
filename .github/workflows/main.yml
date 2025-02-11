@@ -10,7 +10,7 @@ on:
 jobs:
   integration:
     name: Continuous Integration
-    runs-on: self-hosted  # Esto utiliza el runner self-hosted
+    runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -24,7 +24,7 @@ jobs:
   build-and-push-ar-image:
     name: Continuous Delivery
     needs: integration
-    runs-on: self-hosted  # Esto utiliza el runner self-hosted
+    runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -63,7 +63,7 @@ jobs:
   deploy:
     name: Deploy Docker Image
     needs: build-and-push-ar-image
-    runs-on: self-hosted  # Esto utiliza el runner self-hosted
+    runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -91,20 +91,17 @@ jobs:
         run: |
           docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
 
-          - name: Run Docker Image to serve users
-          run: |
-            echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > key.json
-            docker run -d -p 8080:8080 --ipc="host" --name=networksecurity \
+      - name: Run Docker Image to serve users
+        run: |
+          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > key.json
+          docker run -d -p 8080:8080 --ipc="host" --name=networksecurity \
             -e GOOGLE_APPLICATION_CREDENTIALS="/app/key.json" \
             -v "$(pwd)/key.json:/app/key.json" \
             ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
 
-
       - name: Verificar contenedores activos
         run: docker ps
 
-      - name: limpiar imagenes y contenedores
+      - name: Limpiar imagenes y contenedores
         run: |
-         docker system prune -f
-
-
+          docker system prune -f
