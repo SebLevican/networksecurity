@@ -10,7 +10,7 @@ on:
 jobs:
   integration:
     name: Continuous Integration
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Esto utiliza el runner self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -23,8 +23,8 @@ jobs:
 
   build-and-push-ar-image:
     name: Continuous Delivery
-    needs: integration  
-    runs-on: ubuntu-latest
+    needs: integration
+    runs-on: self-hosted  # Esto utiliza el runner self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -63,7 +63,7 @@ jobs:
   deploy:
     name: Deploy Docker Image
     needs: build-and-push-ar-image
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Esto utiliza el runner self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -100,3 +100,5 @@ jobs:
 
       - name: Verificar contenedores activos
         run: docker ps
+
+
