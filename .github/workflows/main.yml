@@ -91,14 +91,18 @@ jobs:
         run: |
           docker pull ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
 
-      - name: Run Docker Image to serve users
-        run: |
-          docker run -d -p 8080:8000 --ipc="host" --name=networksecurity \
-          -v "$(pwd)/key.json:/app/key.json" \
-          -e GOOGLE_APPLICATION_CREDENTIALS="/app/key.json" \
-          ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
+          - name: Run Docker Image to serve users
+          run: |
+            docker run -d -p 8080:8080 --ipc="host" --name=networksecurity \
+            -e GOOGLE_APPLICATION_CREDENTIALS="${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" \
+            ${{ secrets.GCP_ARTIFACT_REGISTRY_URI }}:latest
+        
 
       - name: Verificar contenedores activos
         run: docker ps
+
+      - name: limpiar imagenes y contenedores
+        run: |
+         docker system prune -f
 
 
